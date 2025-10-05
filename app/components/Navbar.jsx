@@ -61,7 +61,7 @@ function Navbar() {
       {/* เมนู (desktop) */}
       <ul className="hidden sm:flex flex-row space-x-4 p-2 text-black font-bold absolute right-20">
         <li><Link href="/">HOME</Link></li>
-        <li><Link href="#">ORDER</Link></li>
+        <li><Link href="/order">ORDER</Link></li>
         <li><Link href="#">ABOUT</Link></li>
         <li><Link href="/search">SEARCH</Link></li>
         <li><Link href="#">INBOX</Link></li>
