@@ -71,7 +71,7 @@ function Navbar() {
       {isOpen && (
         <ul className="absolute top-14 left-0 w-full bg-white flex flex-col items-center space-y-4 py-4 sm:hidden shadow-md">
           <li><Link href="/">HOME</Link></li>
-          <li><Link href="#">ORDER</Link></li>
+          <li><Link href="/order">ORDER</Link></li>
           <li><Link href="#">ABOUT</Link></li>
           <li><Link href="/search">SEARCH</Link></li>
           <li><Link href="#">INBOX</Link></li>

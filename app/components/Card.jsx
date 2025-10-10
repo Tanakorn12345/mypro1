@@ -1,6 +1,9 @@
+"use client";
+import { useRouter } from "next/navigation";
 import React from "react";
 
 function Card() {
+  const router = useRouter(); // ✅ ประกาศ router ที่นี่
   return (
     <div className="flex flex-row flex-wrap gap-7 p-4 justify-center">
       <div className="max-w-sm w-full sm:w-72 md:w-80 lg:w-75 rounded-2xl shadow-lg bg-white overflow-visible">
@@ -71,7 +74,9 @@ function Card() {
           </div>
 
           {/* ปุ่ม */}
-          <button className="bg-green-500 px-4 py-2 text-white rounded-md hover:bg-green-600 transition-all w-fit">
+          <button onClick={() => router.push("/shop")}
+            className="bg-green-500 px-4 py-2 text-white rounded-md hover:bg-green-600 transition-all w-fit"
+          >
             See more
           </button>
         </div>

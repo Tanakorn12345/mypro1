@@ -1,5 +1,7 @@
 import React from 'react'
 
+import Link from "next/link";
+
 function Loginadmin() {
     return (
         <div>
@@ -78,9 +80,9 @@ function Loginadmin() {
 
                                 <p className="mt-10 text-center text-sm/6 text-gray-400">
                                     Not a member?{' '}
-                                    <a href="#" className="font-semibold text-black hover:text-green-400">
+                                    <Link href="/register/registorforadmin" className="font-semibold text-black hover:text-green-400">
                                         Create Account
-                                    </a>
+                                    </Link>
                                 </p>
                             </div>
                         </div>
