@@ -14,7 +14,7 @@ export default function MenuCard({ item }) {
       <h4 className="font-medium">{item.name}</h4>
       <p className="text-red-600 font-bold mt-1">{item.price}</p>
       <button className="mt-3 bg-green-500 text-white rounded-full p-2 hover:bg-green-600 transition">
-        +
+        ordered
       </button>
     </motion.div>
   );
