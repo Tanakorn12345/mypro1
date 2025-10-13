@@ -57,7 +57,7 @@ export default function ShopDetailPage() {
 
       {/* ✅ ส่ง title และ items ที่ตรงกับแท็บที่เลือกไปให้ MenuSection */}
       {activeMenuItems.length > 0 ? (
-        <MenuSection title={activeTab} items={activeMenuItems} />
+        <MenuSection title={activeTab} items={activeMenuItems} restaurant={restaurant}/>
       ) : (
         <div className="text-center py-10 text-gray-500">
           ไม่มีข้อมูลเมนูสำหรับร้านนี้
