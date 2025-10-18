@@ -1,25 +1,25 @@
-"use client"
-import React from 'react'
-import { useRouter } from "next/navigation";
-import Navbar from "../components/Navbar"
-import Selectlogin from '../components/Selectlogin'
-import Footer from '../components/Footer'
-import Logincustomer from './Logincustomerr/page'
-import Background from '../components/Background'
+// app/login/page.jsx
 
-function selectlogin() {
+import Navbar from '../components/Navbar';
+import LoginForm from './LoginForm'; // 👈 Import Client Component เข้ามา
 
+// ✅ สามารถ export metadata ได้
+export const metadata = {
+    title: 'Login Page',
+    description: 'Login to our website',
+  };
+  
+  // 2. แยก viewport ออกมาเป็น export ของตัวเองแบบนี้ ✅
+  export const viewport = {
+    width: 'device-width',
+    initialScale: 1,
+  };
+
+export default function LoginPage() {
   return (
-    
-    <>
-    <Navbar/>
-    <Background/>
-     <Selectlogin/>
-     <Footer/>
-    
-    </>
-  )
+    <div className="min-h-screen bg-gray-100 font-sans">
+      <Navbar />
+      <LoginForm /> {/* 👈 เรียกใช้งาน Component ที่มีการโต้ตอบ */}
+    </div>
+  );
 }
-
-
-export default selectlogin

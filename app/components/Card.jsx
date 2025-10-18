@@ -1,16 +1,27 @@
 "use client";
 import { useRouter } from "next/navigation";
 import React from "react";
+import { useAuth } from '../context/AuthContext';
 
 function Card({ restaurant }) {
   const router = useRouter();
+  const { isAuthenticated } = useAuth(); // <-- ดึงสถานะการล็อกอินมาใช้
+  const handleClick = () => {
+    // ถ้าล็อกอินแล้ว ให้ไปที่หน้าร้านอาหาร
+    if (isAuthenticated) {
+      router.push(`/shop/${restaurant.id}`);
+    } else {
+      // ถ้ายังไม่ล็อกอิน ให้ไปที่หน้า login
+      router.push('/login');
+    }
+  };
   if (!restaurant) return null;
 
   const { name, branch, rating, image, slug } = restaurant;
   const shopUrl = `/shop/${slug}`;
 
   return (
-    <div className="max-w-xs w-full sm:w-64 md:w-72 rounded-2xl shadow-lg bg-white overflow-visible transition-transform duration-300 hover:scale-105 flex flex-col">
+    <div onClick={handleClick} className="max-w-xs w-full sm:w-64 md:w-72 rounded-2xl shadow-lg bg-white overflow-visible transition-transform duration-300 hover:scale-105 flex flex-col">
       <img
         className="w-full h-48 object-cover cursor-pointer rounded-t-2xl"
         src={image}

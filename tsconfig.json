@@ -21,14 +21,16 @@
       {
         "name": "next"
       }
-    ]
+    ],
+    "strictNullChecks": true
   },
   "include": [
     "next-env.d.ts",
     ".next/types/**/*.ts",
     "**/*.ts",
-    "**/*.tsx"
-, "app/components/Card.jsx"  ],
+    "**/*.tsx",
+    "app/components/Card.jsx"
+  ],
   "exclude": [
     "node_modules"
   ]
