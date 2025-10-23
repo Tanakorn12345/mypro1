@@ -38,6 +38,17 @@ export default function LoginForm() {
     const customerAuth = useCustomerAuth();
     const shopAuth = useShopAuth();
     const adminAuth = useAdminAuth();
+
+    // 🟩 ฟังก์ชันเมื่อ login สำเร็จ
+  const handleLoginSuccess = (role) => {
+    if (role === "admin") {
+      router.push("/manage"); // ไปหน้า Overview / ManageHome
+    } else if (role === "shop") {
+      router.push("/shop");
+    } else {
+      router.push("/"); // ลูกค้ากลับหน้าแรก
+    }
+  };
     
     return (
         <>

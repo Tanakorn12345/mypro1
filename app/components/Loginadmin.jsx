@@ -63,7 +63,8 @@ function Loginadmin() {
                                                 type="password"
                                                 required
                                                 autoComplete="current-password"
-                                                className="block w-full rounded-md bg-white/5 px-3 py-1.5 text-base text-black outline-1 -outline-offset-1 outline-white/10 placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-green-500 sm:text-sm/6"
+                                                className="block w-full rounded-md bg-white px-3 py-1.5 text-black placeholder:text-black focus:outline-2 focus:outline-green-500 sm:text-sm"
+                                                
                                             />
                                         </div>
                                     </div>
@@ -78,7 +79,7 @@ function Loginadmin() {
                                     </div>
                                 </form>
 
-                                <p className="mt-10 text-center text-sm/6 text-gray-400">
+                                <p className="mt-10 text-center text-sm/6 text-black">
                                     Not a member?{' '}
                                     <Link href="/register/registorforadmin" className="font-semibold text-black hover:text-green-400">
                                         Create Account
