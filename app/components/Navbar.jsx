@@ -1,12 +1,29 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react"; // 👈 1. เพิ่ม useEffect
 import Link from "next/link";
-import { useAuth } from '../context/AuthContext'; // ✅
-
+import { useAuth } from '../context/AuthContext';
 
 function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
-  const { isAuthenticated, user, logout, loading } = useAuth(); // 👈 ดึง state และฟังก์ชัน
+  const { isAuthenticated, user, logout, loading } = useAuth();
+  
+  // 👇 2. สร้าง state และฟังก์ชันสำหรับคำทักทายตามช่วงเวลา
+  const [greeting, setGreeting] = useState('');
+
+  useEffect(() => {
+    const getGreeting = () => {
+      const currentHour = new Date().getHours();
+      if (currentHour >= 5 && currentHour < 12) {
+        return 'Morning';
+      } else if (currentHour >= 12 && currentHour < 18) {
+        return 'Afternoon';
+      } else {
+        return 'Evening';
+      }
+    };
+    // ตั้งค่าคำทักทายเมื่อ Component โหลดเสร็จ (ทำงานฝั่ง Client)
+    setGreeting(getGreeting());
+  }, []); // `[]` หมายถึงให้ Effect นี้ทำงานแค่ครั้งเดียว
 
   return (
     <nav className="bg-white p-2 flex flex-row justify-between items-center relative z-50 shadow-sm">
@@ -15,7 +32,7 @@ function Navbar() {
         LINE GIRL
       </Link>
 
-      {/* 🎯 ส่วนขวา: รวมเมนูหลักและโปรไฟล์ไว้ด้วยกัน */}
+      {/* ส่วนขวา: รวมเมนูหลักและโปรไฟล์ไว้ด้วยกัน */}
       <div className="flex items-center gap-4">
         
         {/* เมนู (desktop) */}
@@ -35,7 +52,8 @@ function Navbar() {
             // --- ถ้าล็อกอินแล้ว ---
             <div className="flex items-center gap-3">
               <span className="text-sm font-medium text-gray-700 hidden sm:inline">
-                Hello, {user.username || user.email}
+                {/* 👇 3. แก้ไขการแสดงผลตรงนี้ */}
+                Hello {greeting}, {user.username || user.email}
               </span>
               <button
                 onClick={logout}

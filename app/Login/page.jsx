@@ -1,5 +1,5 @@
 import Navbar from '../components/Navbar';
-import LoginForm from './LoginForm';
+import LoginForm from './LoginForm'; // 👈 กลับมาใช้ LoginForm เหมือนเดิม
 
 export const metadata = {
   title: 'Login Page',
@@ -15,7 +15,7 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen bg-gray-100 font-sans">
       <Navbar />
-      <LoginForm />
+      <LoginForm /> {/* 👈 เรียกใช้ LoginForm ที่เราแก้ไขแล้ว */}
     </div>
   );
 }

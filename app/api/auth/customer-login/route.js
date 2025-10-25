@@ -41,7 +41,7 @@ export async function POST(request) {
 
         // (ส่วนสร้าง Token และ Cookie เหมือนเดิมทุกอย่าง)
         const token = jwt.sign(
-            { id: user.id, email: user.email, role: user.role },
+            { id: user.id, username: user.username , email: user.email, role: user.role },
             process.env.JWT_SECRET,
             { expiresIn: '1h' }
         );
