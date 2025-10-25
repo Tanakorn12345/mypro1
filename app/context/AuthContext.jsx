@@ -1,10 +1,12 @@
 "use client";
 
 import React, { createContext, useState, useEffect, useContext } from 'react';
+import { useRouter } from 'next/navigation';
 
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
+  const router = useRouter();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -27,16 +29,25 @@ export const AuthProvider = ({ children }) => {
     checkUser();
   }, []);
 
+  const login = (userData) => setUser(userData);
+
+  const logout = async () => {
+    try {
+      await fetch('/api/auth/logout', { method: 'POST' });
+    } finally {
+      setUser(null);
+      router.push('/login');
+    }
+  };
+
   const isAuthenticated = !!user;
 
   return (
-    <AuthContext.Provider value={{ user, isAuthenticated, loading }}>
+    <AuthContext.Provider value={{ user, isAuthenticated, loading, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
 };
 
-// สร้าง custom hook เพื่อให้เรียกใช้งานง่าย
-export const useAuth = () => {
-  return useContext(AuthContext);
-};
+// ✅ Named export
+export const useAuth = () => useContext(AuthContext);

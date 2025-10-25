@@ -1,47 +1,40 @@
+// app/components/AuthForm.jsx
 "use client";
+// app/Login/LoginForm.jsx
 
+import { AuthForm } from '../components/AuthForm'; // 👈 เพิ่มวงเล็บปีกกา {}
 import { useRouter } from 'next/navigation';
 
-const AuthForm = ({ title, formData, error, handleChange, handleSubmit }) => {
+// 👇 1. เพิ่มคำว่า export เข้าไปข้างหน้า
+export const AuthFormComponent = ({ title, formData, error, handleChange, handleSubmit }) => {
     const router = useRouter(); 
 
     const handleCreateAccountClick = () => {
-        // ดึงคำสุดท้ายจาก title (เช่น "CUSTOMER") แล้วแปลงเป็นตัวพิมพ์เล็ก ("customer")
         const role = title.split(' ').pop().toLowerCase();
-
-        // สร้าง URL ใหม่แล้วส่งผู้ใช้ไปที่หน้า /register พร้อมแนบ Role ไปด้วย
         router.push(`/register?role=${role}`);
     };
 
     return (
-        // --- Main Card ---
         <div className="w-[95%] sm:w-full max-w-md bg-white rounded-3xl shadow-xl p-5 sm:p-8">
-            
-            {/* --- Title --- */}
+            {/* ... โค้ดส่วน JSX เหมือนเดิมทุกอย่าง ... */}
             <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-center text-gray-800 mb-6 sm:mb-8">
                 {title.toUpperCase()}
             </h2>
-
-            {/* --- Login Form --- */}
             <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
-                
-                {/* --- Username Field --- */}
                 <div>
-                    <label htmlFor="email" className="block text-sm sm:text-base font-medium text-gray-700 mb-1.5">
+                    <label htmlFor="username" className="block text-sm sm:text-base font-medium text-gray-700 mb-1.5">
                         Username
                     </label>
                     <input
-                        type="email"
-                        id="email"
-                        name="email"
-                        value={formData.email}
+                        type="text"
+                        id="username"
+                        name="username"
+                        value={formData.username}
                         onChange={handleChange}
                         required
                         className="w-full px-5 py-2.5 sm:py-3 bg-gray-200 border-none rounded-full focus:ring-2 focus:ring-green-400 focus:outline-none transition"
                     />
                 </div>
-
-                {/* --- Password Field --- */}
                 <div>
                     <label htmlFor="password" className="block text-sm sm:text-base font-medium text-gray-700 mb-1.5">
                         Password
@@ -56,10 +49,7 @@ const AuthForm = ({ title, formData, error, handleChange, handleSubmit }) => {
                         className="w-full px-5 py-2.5 sm:py-3 bg-gray-200 border-none rounded-full focus:ring-2 focus:ring-green-400 focus:outline-none transition"
                     />
                 </div>
-                
                 {error && <p className="text-xs sm:text-sm text-center text-red-600 pt-1">{error}</p>}
-
-                {/* --- LOG IN Button --- */}
                 <div className="pt-2 flex justify-end">
                     <button 
                         type="submit"
@@ -68,9 +58,7 @@ const AuthForm = ({ title, formData, error, handleChange, handleSubmit }) => {
                         LOG IN
                     </button>
                 </div>
-            </form> {/* <-- ฟอร์มจบตรงนี้ --> */}
-
-            {/* --- Create Account Button (อยู่นอกฟอร์ม) --- */}
+            </form>
             <div className="mt-6 sm:mt-8">
                  <button 
                     type="button"
@@ -84,4 +72,5 @@ const AuthForm = ({ title, formData, error, handleChange, handleSubmit }) => {
     );
 };
 
-export default AuthForm;
+// ❌ ไม่ต้องมี export default ที่ท้ายไฟล์แล้ว
+// export default AuthForm;

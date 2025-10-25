@@ -1,59 +1,61 @@
-// hooks/useCustomerAuth.js
+// app/hooks/useShopAuth.jsx
 "use client"
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useAuth } from '../context/AuthContext'; // 👈 Import useAuth
 
 export const useShopAuth = () => {
-    const router = useRouter();
+    const { login } = useAuth(); // 👈 ดึงฟังก์ชัน login มาใช้
     const [formData, setFormData] = useState({
-        email: '',
+        username: '', // หรือ email ตามที่คุณใช้
         password: '',
     });
-    const [error, setError] = useState(null); // State สำหรับเก็บ Error
+    const [error, setError] = useState(null);
+    const [isSubmitting, setIsSubmitting] = useState(false); // 👈 เพิ่ม state สำหรับ loading
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setError(null); // เคลียร์ error เมื่อผู้ใช้เริ่มพิมพ์ใหม่
-        setFormData(prevData => ({
-            ...prevData,
-            [name]: value,
-        }));
+        setError(null);
+        setFormData(prevData => ({ ...prevData, [name]: value }));
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setError(null); // เคลียร์ error เก่าทุกครั้งที่กด submit
+        setError(null);
+        setIsSubmitting(true); // 👈 เริ่ม loading
 
         try {
-            // **นี่คือส่วนที่เชื่อมต่อ Frontend กับ Backend**
             const response = await fetch('/api/auth/shop-login', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(formData), // แปลงข้อมูลในฟอร์มเป็น JSON string
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formData),
             });
-
-            // ถ้า API ตอบกลับมาว่าสำเร็จ (status 200)
+            
             if (response.ok) {
-                // ส่งผู้ใช้ไปที่หน้า dashboard หรือหน้าหลักหลังล็อกอิน
-                router.push('/'); // หรือ '/customer/dashboard'
+                const userResponse = await fetch('/api/auth/me');
+                if (userResponse.ok) {
+                    const { user } = await userResponse.json();
+                    login(user); // อัปเดต State ส่วนกลาง
+                }
+                return true; // 👈 คืนค่า true บอกว่าสำเร็จ
             } else {
-                // ถ้า API ตอบกลับมาว่ามีปัญหา (เช่น รหัสผิด status 401)
                 const data = await response.json();
-                setError(data.message || 'An error occurred.'); // แสดง error ที่ได้จาก API
+                setError(data.message || 'An error occurred.');
+                return false; // 👈 คืนค่า false บอกว่าล้มเหลว
             }
 
         } catch (err) {
-            // กรณีที่ Network หรือ Server มีปัญหา
             console.error('Fetch error:', err);
             setError('Could not connect to the server.');
+            return false;
+        } finally {
+            setIsSubmitting(false); // 👈 หยุด loading
         }
     };
 
     return {
         formData,
         error,
+        isSubmitting, // 👈 ส่ง state loading ออกไป
         handleChange,
         handleSubmit,
     };
