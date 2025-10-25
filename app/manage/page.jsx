@@ -66,7 +66,7 @@ function ManageHome() {
           {/* MANAGEMENT MODE Button */}
           <button
             className="bg-green-500 text-white font-bold py-3 px-5 rounded-lg hover:bg-green-600 transition duration-200 w-full md:w-auto whitespace-nowrap mt-4 md:mt-0"
-            onClick={() => router.push("/overview")}
+            onClick={() => router.push("/manage/overview")}
           >
             MANAGEMENT MODE
           </button>
