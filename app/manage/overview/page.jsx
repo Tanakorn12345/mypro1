@@ -71,7 +71,7 @@ export default function OverviewPage() {
       <Navbar />
       <main className="max-w-6xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
         <div className="mb-4">
-          <h1 className="text-2xl font-semibold underline decoration-black/80 decoration-2 mb-1">
+          <h1 className="text-2xl font-semibold  decoration-black/80 decoration-2 mb-1">
             Product Overview
           </h1>
           <p className="text-gray-700">Overview Menu</p>
@@ -109,7 +109,7 @@ export default function OverviewPage() {
                   <th className="bg-[#B9E8B8] text-left py-4 px-6">RESTAURANT NAME</th>
                   <th className="bg-[#B9E8B8] text-left py-4 px-6">PRICE</th>
                   <th className="bg-[#B9E8B8] text-left py-4 px-6">STATUS</th>
-                  <th className="bg-[#B9E8B8] text-left py-4 px-6">ACTION</th>
+                  
                 </tr>
               </thead>
               <tbody>
@@ -135,11 +135,7 @@ export default function OverviewPage() {
                       <td className="py-4 px-4"><div className="bg-[#fff9c7] rounded-full px-6 py-3">{formatPrice(menu.price)}</div></td>
                       <td className="py-4 px-4"><div className="bg-[#fff9c7] rounded-full px-6 py-3">{menu.status}</div></td>
                       <td className="py-4 px-4">
-                        <Link href={`/manage/update/${menu.id}`}>
-                          <span className="bg-[#A6D6B0] text-black font-semibold text-xs px-4 py-2 rounded-full shadow hover:bg-[#8cc99b] transition cursor-pointer">
-                            Edit
-                          </span>
-                        </Link>
+                        
                       </td>
                     </tr>
                   ))
