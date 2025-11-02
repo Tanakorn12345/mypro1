@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation"; // <-- Commented out for Canvas
 import { Loader2, UserPlus } from "lucide-react"; 
 
 export default function AddUserPage() {
-  // const router = useRouter(); // <-- Commented out for Canvas
+  const router = useRouter(); // <-- Commented out for Canvas
 
   // 1. State สำหรับฟอร์ม (เพิ่ม password และ role)
   const [form, setForm] = useState({
@@ -33,9 +33,8 @@ export default function AddUserPage() {
       console.log("--- Mock Add User ---");
       console.log("Form Data:", JSON.stringify(form));
 
-      // --- (ในอนาคต) uncomment ส่วนนี้เพื่อยิง API สร้าง User ---
-      /*
-      const res = await fetch(`/api/users`, { // <-- ยิงไปที่ /api/users
+     
+      const res = await fetch(`/api/admin/users`, { // <-- ยิงไปที่ /api/users
           method: "POST", // <-- ใช้ Method POST
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(form),
@@ -45,7 +44,7 @@ export default function AddUserPage() {
           const errorData = await res.json();
           throw new Error(errorData.message || "Failed to create user.");
       }
-      */
+      
 
       // --- จำลองว่าสำเร็จ ---
       await new Promise(resolve => setTimeout(resolve, 1000)); // หน่วงเวลา 1 วิ

@@ -16,6 +16,9 @@ export default function CreateRestaurantPage() {
         opening_hours: "",
         phone: "",
         address: "",
+        branch: "", // <-- เพิ่ม
+        slug: "",   // <-- เพิ่ม
+        type: ""    // <-- เพิ่ม
     });
     const [submitting, setSubmitting] = useState(false);
     const [submitStatus, setSubmitStatus] = useState({ message: "", type: "" });
@@ -26,13 +29,12 @@ export default function CreateRestaurantPage() {
 
     // --- 4. Cleanup Object URL ---
     useEffect(() => {
-        // Function นี้จะถูกเรียกเมื่อ component unmount หรือ imagePreview เปลี่ยนไป
         return () => {
           if (imagePreview && imagePreview.startsWith("blob:")) {
             URL.revokeObjectURL(imagePreview);
           }
         };
-      }, [imagePreview]);
+    }, [imagePreview]);
 
 
     const handleChange = (e) => {
@@ -46,14 +48,13 @@ export default function CreateRestaurantPage() {
         const file = e.target.files?.[0];
         if (!file) return;
 
-        // ล้าง Object URL เก่า ถ้ามี
         if (imagePreview && imagePreview.startsWith("blob:")) {
             URL.revokeObjectURL(imagePreview);
         }
 
-        const url = URL.createObjectURL(file); // สร้าง URL ชั่วคราว
-        setImageFile(file); // เก็บ File object
-        setImagePreview(url); // เก็บ URL สำหรับแสดงผล
+        const url = URL.createObjectURL(file); 
+        setImageFile(file);
+        setImagePreview(url);
     };
 
     // --- 5. อัปเดต handleSubmit ให้ใช้ FormData ---
@@ -68,67 +69,51 @@ export default function CreateRestaurantPage() {
             return;
         }
 
-        // สร้าง FormData object
         const formData = new FormData();
-        formData.append("name", form.name);
-        formData.append("description", form.description);
-        formData.append("opening_hours", form.opening_hours);
-        formData.append("phone", form.phone);
-        formData.append("address", form.address);
-        // เพิ่มไฟล์รูปภาพเข้าไป (ถ้ามี)
+        for (let key in form) {
+            formData.append(key, form[key]);
+        }
+
         if (imageFile) {
-            formData.append("image", imageFile); // 'image' คือ key ที่ Backend จะใช้รับไฟล์
+            formData.append("image", imageFile);
         }
 
         try {
             console.log("--- Submitting Create Restaurant Form (with FormData) ---");
-            // Log ดูข้อมูลใน FormData (อาจจะไม่แสดง File โดยตรง)
             for (let [key, value] of formData.entries()) {
-                 console.log(`${key}: ${value instanceof File ? value.name : value}`); // แสดงชื่อไฟล์ถ้าเป็น File
+                 console.log(`${key}: ${value instanceof File ? value.name : value}`);
             }
 
-            // --- 👇 ทำการ Uncomment ส่วนนี้ ---
-            const res = await fetch('/api/restaurants', { // <-- ตรวจสอบ Path ให้ถูกต้อง
+            const res = await fetch('/api/restaurants', {
                 method: 'POST',
-                body: formData, // ส่ง FormData
-                // ไม่ต้องใส่ headers Content-Type: application/json
+                body: formData,
             });
 
             if (!res.ok) {
-                // พยายามอ่าน Error message จาก Backend (ถ้าส่งมาเป็น JSON)
                 let errorData = { message: "Failed to create restaurant. Status: " + res.status };
-                try {
-                   errorData = await res.json();
-                } catch (jsonError) {
-                   console.error("Could not parse error response as JSON", jsonError);
-                   errorData.message = await res.text(); // อ่านเป็น Text แทนถ้า JSON ไม่ได้
-                }
+                try { errorData = await res.json(); } catch (jsonError) { errorData.message = await res.text(); }
                 throw new Error(errorData.message || "Something went wrong.");
             }
-            // --- สิ้นสุดส่วน Uncomment ---
 
-            // --- ถ้าสำเร็จ ---
-            const result = await res.json(); // อ่าน response จาก Backend
+            const result = await res.json();
             console.log("Backend Response:", result);
 
             setSubmitStatus({ message: "Restaurant created successfully! Redirecting...", type: "success" });
             setTimeout(() => {
-                // router.push("/manage"); // <-- Use this in real project
-                console.log("Redirecting to /manage...");
-                window.location.href = "/manage"; // Temporary redirect
+                 router.push("/manage"); // Uncomment in real project
+                window.location.href = "/manage"; 
             }, 2000);
 
         } catch (err) {
             console.error("Create Restaurant Error:", err);
             setSubmitStatus({ message: err.message || "Failed to create restaurant.", type: "error" });
-            setSubmitting(false); // หยุด Submitting ถ้า Error
+            setSubmitting(false);
         }
-        // ไม่ต้อง setSubmitting(false) ถ้าสำเร็จ เพราะเรา Redirect
     };
 
     return (
         <div className="min-h-screen bg-white">
-            <Navbar /> 
+             <Navbar /> 
             <div className="p-8 max-w-4xl mx-auto">
                 <div className="flex items-center gap-3 mb-4">
                      <Store className="w-6 h-6 text-green-700" />
@@ -149,19 +134,47 @@ export default function CreateRestaurantPage() {
                         />
                     </div>
 
-                    {/* --- 2. เพิ่มช่อง Upload รูปภาพ --- */}
+                    {/* Branch */}
+                    <div>
+                        <label htmlFor="branch" className="block font-semibold mb-1 text-gray-700">Branch</label>
+                        <input
+                            type="text" id="branch" name="branch"
+                            value={form.branch} onChange={handleChange}
+                            className="w-full bg-orange-50 rounded-full px-4 py-2 outline-none focus:ring-2 focus:ring-green-400"
+                        />
+                    </div>
+
+                    {/* Slug */}
+                    <div>
+                        <label htmlFor="slug" className="block font-semibold mb-1 text-gray-700">Slug</label>
+                        <input
+                            type="text" id="slug" name="slug"
+                            value={form.slug} onChange={handleChange}
+                            className="w-full bg-orange-50 rounded-full px-4 py-2 outline-none focus:ring-2 focus:ring-green-400"
+                        />
+                    </div>
+
+                    {/* Type */}
+                    <div>
+                        <label htmlFor="type" className="block font-semibold mb-1 text-gray-700">Type</label>
+                        <input
+                            type="text" id="type" name="type"
+                            value={form.type} onChange={handleChange}
+                            className="w-full bg-orange-50 rounded-full px-4 py-2 outline-none focus:ring-2 focus:ring-green-400"
+                        />
+                    </div>
+
+                    {/* --- Image Upload --- */}
                     <div>
                         <label className="block font-semibold mb-1 text-gray-700">Restaurant Image</label>
                         <input
-                            type="file"
-                            accept="image/*" // รับเฉพาะไฟล์รูปภาพ
+                            type="file" accept="image/*"
                             ref={fileInputRef}
                             onChange={handleImageChange}
-                            className="hidden" // ซ่อน input file จริง
+                            className="hidden"
                         />
-                        {/* ส่วนที่แสดงผลให้ User คลิก */}
                         <div
-                            onClick={() => fileInputRef.current?.click()} // คลิกที่นี่ -> ไปสั่งคลิก input file
+                            onClick={() => fileInputRef.current?.click()}
                             role="button"
                             tabIndex={0}
                             onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') fileInputRef.current?.click(); }}
@@ -180,7 +193,6 @@ export default function CreateRestaurantPage() {
                             )}
                         </div>
                     </div>
-
 
                     {/* Description */}
                     <div>
@@ -226,7 +238,6 @@ export default function CreateRestaurantPage() {
                         />
                     </div>
 
-
                     {/* Submit Status */}
                     {submitStatus.message && (
                         <div className={`p-3 rounded-lg text-center font-semibold ${
@@ -255,4 +266,3 @@ export default function CreateRestaurantPage() {
         </div>
     );
 }
-

@@ -1,70 +1,134 @@
 "use client";
 
 import { useParams } from 'next/navigation';
-import React, { useState } from 'react'; // ✅ เพิ่ม useState
+import React, { useState, useEffect, use } from 'react'; // <-- เพิ่ม Hooks
+import { Loader2 } from 'lucide-react'; // <-- เพิ่ม Loader
 
-// Import Components ที่จำเป็น
-import Navbar from '../../components/Navbar';
-import Footer from '../../components/Footer';
+// Import Components (เหมือนเดิม)
+import Navbar from '../../components/Navbar'; // <-- Commented out for Canvas
+import Footer from '../../components/Footer'; // <-- Commented out for Canvas
 import StoreBanner from '../../components/StoreBanner';
 import MenuTabs from '../../components/MenuTabs';
 import MenuSection from '../../components/MenuSection';
 
-// Import ข้อมูลจากไฟล์กลาง
-import { allRestaurants } from '../../data/restaurant';
+// --- ลบ import { allRestaurants } from '../../data/restaurant'; ---
 
 export default function ShopDetailPage() {
-  const params = useParams();
-  const slug = params.slug;
+  const params = useParams(); // <-- ใช้ useParams
+  const slug = params?.slug;
 
-  const restaurant = allRestaurants.find(r => r.slug === slug);
-  
-  // ✅ สร้าง state เพื่อเก็บว่าแท็บไหนกำลัง Active
-  // ตั้งค่าเริ่มต้นให้เป็น category แรกของร้านนั้นๆ
-  const [activeTab, setActiveTab] = useState(restaurant?.menu[0]?.category);
+  // --- 🎯 State สำหรับเก็บข้อมูล, Loading, Error ---
+  const [restaurant, setRestaurant] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [activeTab, setActiveTab] = useState(null); // เริ่มต้นเป็น null
 
-  // กรณีไม่พบร้านอาหาร (URL ผิด)
-  if (!restaurant) {
-    // ... โค้ดส่วน 404 เหมือนเดิม ...
-    return <div>404 Not Found</div>
+  // --- 🎯 useEffect สำหรับ Fetch ข้อมูล ---
+  useEffect(() => {
+    if (!slug) {
+        setError("Restaurant slug not found.");
+        setLoading(false);
+        return;
+    }
+
+    const fetchRestaurantDetails = async () => {
+        setLoading(true);
+        setError(null);
+        try {
+            // --- เรียก API ใหม่ ---
+            const res = await fetch(`/api/shop/${slug}`, { cache: 'no-store' }); 
+            if (!res.ok) {
+                let errorMsg = `Failed to fetch restaurant. Status: ${res.status}`;
+                try { const e = await res.json(); errorMsg = e.message || errorMsg; } catch (_) {}
+                throw new Error(errorMsg);
+            }
+            const data = await res.json();
+            
+            if (data.restaurant) {
+                setRestaurant(data.restaurant); // <-- เก็บข้อมูลร้าน
+                // ตั้งค่า Tab แรก (ถ้ามีเมนู)
+                if (data.restaurant.menu && data.restaurant.menu.length > 0) {
+                    setActiveTab(data.restaurant.menu[0].category);
+                }
+            } else {
+                throw new Error("Restaurant data not found in response.");
+            }
+        } catch (err) {
+            console.error("Fetch shop detail error:", err);
+            setError(err.message);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    fetchRestaurantDetails();
+  }, [slug]); // ทำงานใหม่ถ้า slug เปลี่ยน
+
+
+  // --- 🎯 UI สำหรับ Loading / Error ---
+  if (loading) {
+    return (
+        <div className="min-h-screen bg-white flex items-center justify-center">
+            <Loader2 className="w-10 h-10 text-green-600 animate-spin" />
+            <p className="ml-3 text-gray-600">Loading restaurant details...</p>
+        </div>
+    );
   }
 
-  // ดึงชื่อ category ทั้งหมดของร้านนี้ออกมาเพื่อส่งให้ MenuTabs
+  if (error) {
+     return (
+        <div className="min-h-screen bg-white flex flex-col items-center justify-center p-4">
+            <p className="text-xl text-red-600 mb-4 text-center">Error: {error}</p>
+            {/* (อาจจะเพิ่มปุ่มกลับหน้า Home) */}
+        </div>
+     );
+  }
+
+  // กรณีไม่พบร้านอาหาร (API ตอบ 404 หรือข้อมูลไม่มี)
+  if (!restaurant) {
+    return (
+        <div className="min-h-screen bg-white flex items-center justify-center">
+             <p className="text-gray-600">404: Restaurant not found.</p>
+        </div>
+    );
+  }
+
+  // --- 🎯 Logic แสดงผล (เหมือนเดิม แต่ใช้ State) ---
   const menuCategories = restaurant.menu?.map(cat => cat.category) || [];
-  
-  // ค้นหา array ของ items ที่ตรงกับ activeTab
   const activeMenuItems = restaurant.menu?.find(cat => cat.category === activeTab)?.items || [];
 
   return (
     <div className="min-h-screen bg-gray-50 text-gray-800">
-      <Navbar />
+      <Navbar /> 
 
       <StoreBanner
-        // ... props ของ StoreBanner เหมือนเดิม ...
-        imageUrl={restaurant.image}
+        // --- 🎯 ใช้ข้อมูลจาก State ---
+        imageUrl={restaurant.image || 'https://placehold.co/1200x400/F3EFEF/AAAAAA?text=No+Banner'}
         title={`${restaurant.name} - ${restaurant.branch}`}
         rating={restaurant.rating}
         reviewCount={restaurant.reviewCount}
         details={restaurant.details || ''}
       />
       
-      {/* ✅ ส่ง props ที่จำเป็นไปให้ MenuTabs */}
       <MenuTabs 
         categories={menuCategories}
         activeTab={activeTab}
-        onTabClick={setActiveTab} // ส่งฟังก์ชัน set state ลงไปตรงๆ ได้เลย
+        onTabClick={setActiveTab} 
       />
 
-      {/* ✅ ส่ง title และ items ที่ตรงกับแท็บที่เลือกไปให้ MenuSection */}
       {activeMenuItems.length > 0 ? (
-        <MenuSection title={activeTab} items={activeMenuItems} restaurant={restaurant}/>
+        <MenuSection 
+            title={activeTab} 
+            items={activeMenuItems} 
+            restaurant={{id: restaurant.id, name: restaurant.name}} // ส่งข้อมูลร้านที่จำเป็นสำหรับ Cart
+        />
       ) : (
         <div className="text-center py-10 text-gray-500">
-          ไม่มีข้อมูลเมนูสำหรับร้านนี้
+          This restaurant has no menu items available in this category.
         </div>
       )}
       
-      <Footer />
+      <Footer /> 
     </div>
   );
 }

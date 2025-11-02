@@ -1,27 +1,55 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useMemo } from "react"; // <-- เพิ่ม useEffect, useMemo
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import Card from "../components/Card";
+import { Loader2 } from "lucide-react"; // <-- เพิ่ม Loader
 
-import { allRestaurants } from "../data/restaurant";
-
-
+// import { allRestaurants } from "../data/restaurant"; // <-- 1. ลบข้อมูลจำลอง
 
 function Page() {
+  // --- State สำหรับ Filter/Search (เหมือนเดิม) ---
   const [query, setQuery] = useState("");
   const [showDropdown, setShowDropdown] = useState(false);
   const wrapperRef = useRef(null);
-
   const distances = ["1-2KM", "3-4KM", "4-6KM", "6KM+"];
   const types = ["Thai Food", "Chinese Food", "Japanese Food", "American Food", "Dessert", "Beverage"];
   const ratings = ["⭐", "⭐⭐", "⭐⭐⭐", "⭐⭐⭐⭐", "⭐⭐⭐⭐⭐"];
-
   const [selectedDistance, setSelectedDistance] = useState(null);
   const [selectedType, setSelectedType] = useState(null);
   const [selectedRating, setSelectedRating] = useState(null);
 
+  // --- 2. State สำหรับ Data Fetching ---
+  const [allRestaurants, setAllRestaurants] = useState([]); // <-- เก็บข้อมูลจริง
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // --- 3. useEffect สำหรับ Fetch ข้อมูลร้านค้า ---
+  useEffect(() => {
+    const fetchRestaurants = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const res = await fetch('/api/restaurants', { cache: 'no-store' }); // <-- เรียก API
+        if (!res.ok) {
+          throw new Error(`Failed to fetch restaurants. Status: ${res.status}`);
+        }
+        const data = await res.json();
+        if (Array.isArray(data.restaurants)) {
+          setAllRestaurants(data.restaurants); // <-- เก็บข้อมูลลง State
+        }
+      } catch (err) {
+        console.error("Fetch restaurants error:", err);
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchRestaurants();
+  }, []); // [] = ทำงานครั้งเดียว
+
+  // --- useEffect สำหรับ Click Outside (เหมือนเดิม) ---
   useEffect(() => {
     function handleClickOutside(event) {
       if (wrapperRef.current && !wrapperRef.current.contains(event.target)) {
@@ -30,8 +58,9 @@ function Page() {
     }
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+  }, [wrapperRef]); // <-- เพิ่ม dependency
 
+  // --- Active Filters (เหมือนเดิม) ---
   const activeFilters = [
     selectedDistance && { type: "distance", value: selectedDistance },
     selectedType && { type: "type", value: selectedType },
@@ -44,25 +73,34 @@ function Page() {
     if (filterType === "rating") setSelectedRating(null);
   };
 
-  const filteredRestaurants = allRestaurants.filter(restaurant => {
-    if (query && !restaurant.name.toLowerCase().includes(query.toLowerCase())) {
-      return false;
-    }
-    if (selectedType && restaurant.type !== selectedType) {
-      return false;
-    }
-    if (selectedRating && restaurant.rating !== selectedRating.length) {
-      return false;
-    }
-    if (selectedDistance) {
-      const { distance } = restaurant;
-      if (selectedDistance === "1-2KM" && (distance < 1 || distance > 2)) return false;
-      if (selectedDistance === "3-4KM" && (distance < 3 || distance > 4)) return false;
-      if (selectedDistance === "4-6KM" && (distance < 4 || distance > 6)) return false;
-      if (selectedDistance === "6KM+" && distance <= 6) return false;
-    }
-    return true;
-  });
+  // --- 4. filteredRestaurants (แก้ให้ใช้ State) ---
+  const filteredRestaurants = useMemo(() => {
+    // ใช้ allRestaurants (จาก state) แทน allRestaurants (จาก import)
+    return allRestaurants.filter(restaurant => {
+      // --- Logic การกรอง (เหมือนเดิม) ---
+      if (query && !restaurant.name.toLowerCase().includes(query.toLowerCase())) {
+        return false;
+      }
+      if (selectedType && restaurant.type !== selectedType) {
+        return false;
+      }
+      // (หมายเหตุ: API GET /api/restaurants ต้องส่ง Rating เป็นตัวเลข 1-5)
+      if (selectedRating && restaurant.rating !== selectedRating.length) { 
+        return false;
+      }
+      if (selectedDistance) {
+        // (หมายเหตุ: API GET /api/restaurants ต้องส่ง Distance เป็นตัวเลข)
+        const distance = parseFloat(restaurant.distance); // แปลงเป็นตัวเลข
+        if (isNaN(distance)) return false; // ถ้าไม่มีข้อมูล distance ให้ข้าม
+        if (selectedDistance === "1-2KM" && (distance < 1 || distance > 2)) return false;
+        if (selectedDistance === "3-4KM" && (distance < 3 || distance > 4)) return false;
+        if (selectedDistance === "4-6KM" && (distance < 4 || distance > 6)) return false;
+        if (selectedDistance === "6KM+" && distance <= 6) return false;
+      }
+      return true;
+    });
+  }, [allRestaurants, query, selectedType, selectedRating, selectedDistance]); // <-- เพิ่ม Dependencies
+
 
   return (
     <div>
@@ -72,9 +110,8 @@ function Page() {
       <form
         onSubmit={(e) => e.preventDefault()}
         ref={wrapperRef}
-        className="w-full max-w-[90%] mx-auto mb-5 md:max-w-lg md:ml-20 relative"
+        className="w-full max-w-[90%] mx-auto mb-5 mt-10 md:max-w-lg md:ml-20 relative"
       >
-        {/* ... โค้ดส่วน Tag Filters, Search Input, Dropdown ... */}
          {/* Tag Filters */}
          {activeFilters.length > 0 && (
           <div className="flex flex-wrap gap-2 mb-2">
@@ -151,19 +188,35 @@ function Page() {
       </form>
 
       {/* --- ส่วนแสดงผล --- */}
-      {/* ✅ แก้ไข 1: เพิ่มความกว้าง container เป็น max-w-7xl */}
       <div className="w-full max-w-[90%] mx-auto mb-10 md:max-w-7xl"> 
-        {filteredRestaurants.length > 0 ? (
-          // ✅ แก้ไข 2: เปลี่ยน lg:grid-cols-3 เป็น lg:grid-cols-4
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {filteredRestaurants.map((resto) => (
-              <Card key={resto.id} restaurant={resto} />
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-20">
-            <p className="text-xl text-gray-500">😢 No restaurants found that match the criteria.</p>
-          </div>
+        
+        {/* --- 5. เพิ่ม UI สำหรับ Loading / Error --- */}
+        {loading && (
+           <div className="text-center py-20">
+             <Loader2 className="w-10 h-10 mx-auto text-green-500 animate-spin" />
+             <p className="mt-4 text-gray-500">Loading restaurants...</p>
+           </div>
+        )}
+        {error && (
+           <div className="text-center py-20">
+             <p className="text-xl text-red-500">😢 Error: {error}</p>
+           </div>
+        )}
+        
+        {!loading && !error && (
+          <>
+            {filteredRestaurants.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                {filteredRestaurants.map((resto) => (
+                  <Card key={resto.id} restaurant={resto} />
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-20">
+                <p className="text-xl text-gray-500">😢 No restaurants found that match the criteria.</p>
+              </div>
+            )}
+          </>
         )}
       </div>
       
