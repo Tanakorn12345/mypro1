@@ -219,6 +219,13 @@ function AdminHome() {
 
         {/* ปุ่ม Add User (เหมือนเดิม) */}
         <div className="flex justify-center items-center gap-4 mt-8">
+        <Link href="/admin/banners">
+                <button 
+                  className="bg-[#5FA373] hover:bg-[#4e8c63] text-white px-8 py-3 rounded-lg shadow"
+                >
+                  MANAGE BANNERS
+                </button>
+            </Link>
             <button 
               onClick={handleAddUser} 
               className="bg-[#5FA373] hover:bg-[#4e8c63] text-white px-8 py-3 rounded-lg shadow"
