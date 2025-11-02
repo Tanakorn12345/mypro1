@@ -53,21 +53,21 @@ LINE GIRL คือเว็บแอปพลิเคชันสำหรั�
 ## 💿 การติดตั้งและเริ่มต้นใช้งาน
 
 ### 1. Clone โปรเจกต์
-bash
+```bash
 git clone [Your Repository URL]
 cd mypro1
-
+```
 ### 2. ติดตั้ง Dependencies
-
+```bash
 npm install
-
+```
 ### 3. ตั้งค่าฐานข้อมูล
-
+```bash
 Import สคริปต์ .sql ลงใน MySQL Database
-
+```
 
 ### 4. ตั้งค่า Environment Variables
-
+```bash
 สร้างไฟล์ .env.local ใน Root ของโปรเจกต์:
 
 DB_HOST=localhost
@@ -76,6 +76,8 @@ DB_PASSWORD=[Your_DB_Password]
 DB_DATABASE=[Your_DB_Name]
 
 JWT_SECRET=[Your_Very_Secret_Key]
-
+```
 ### 5. รันเซิร์ฟเวอร์ (Development Mode)
+```bash
 npm run dev
+```
