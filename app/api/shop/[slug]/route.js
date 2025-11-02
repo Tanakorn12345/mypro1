@@ -59,6 +59,20 @@ export async function GET(request, context) {
 
         const restaurantData = restaurantRows[0];
 
+        // --- 🚀 โค้ดที่เพิ่มเข้ามา: Query รีวิว ---
+const [reviewRows] = await connection.execute(
+    `SELECT R.rating, R.comment, R.created_at, U.username 
+     FROM Review R
+     JOIN users U ON R.User_Id = U.id
+     WHERE R.Restaurant_Id = ?
+     ORDER BY R.created_at DESC
+     LIMIT 10`, // <-- ดึงมาแค่ 10 รีวิวล่าสุด (หรือตามต้องการ)
+    [restaurantData.id]
+);
+// --- 🚀 สิ้นสุดโค้ดที่เพิ่มเข้ามา ---
+
+
+
         // Query เมนู
         const [menuRows] = await connection.execute(
             `SELECT * FROM Menu 
@@ -72,6 +86,7 @@ export async function GET(request, context) {
         const fullRestaurantData = {
             ...restaurantData,
             menu: formattedMenu,
+            reviews: reviewRows, // <-- 🚀 เพิ่ม reviews เข้าไปใน object ที่ส่งกลับ
             details: `${restaurantData.type || ''} | ${restaurantData.opening_hours || 'N/A'}`
         };
 

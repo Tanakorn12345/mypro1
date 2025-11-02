@@ -59,15 +59,21 @@ export default function OrderPage() {
           paymentMethod: payment
         })
       });
+      // 1. อ่าน JSON response จาก API ก่อนเสมอ
+      const result = await res.json();
 
       if (!res.ok) {
-        let errorMsg = `Failed to create order. Status: ${res.status}`;
-        try { const errorData = await res.json(); errorMsg = errorData.message || errorMsg; } catch(e) {}
+        // 2. ใช้ message จาก result ที่อ่านมา (ถ้ามี)
+        let errorMsg = result.message || `Failed to create order. Status: ${res.status}`;
         throw new Error(errorMsg);
       }
 
+      // 3. ถ้าสำเร็จ, ดึง orderCartId และส่งต่อไปยังหน้า success
+      const newOrderCartId = result.orderCartId;
+
       clearCart();
-      router.push('/order/success');
+      // 4. ส่ง newOrderCartId ไปกับ URL
+      router.push(`/order/success?orderId=${newOrderCartId}`);
 
     } catch (err) {
       console.error(err);

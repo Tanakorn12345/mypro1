@@ -3,8 +3,11 @@ import React from 'react';
 import Link from 'next/link';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
+import { useSearchParams } from 'next/navigation'; // 👈 1. Import useSearchParams
 
 export default function OrderSuccessPage() {
+  const searchParams = useSearchParams(); // 👈 2. เรียกใช้ hook
+  const orderId = searchParams.get('orderId'); // 👈 3. ดึง orderId ออกมาจาก URL
   return (
     <div>
       <Navbar />
@@ -14,11 +17,26 @@ export default function OrderSuccessPage() {
         </svg>
         <h1 className="mt-4 text-3xl font-bold text-gray-800">The order was successful!</h1>
         <p className="mt-2 text-gray-600">Thank you for your order. We are preparing the food for you.</p>
-        <Link href="/" className="mt-8 inline-block bg-green-500 text-white font-semibold px-6 py-3 rounded-lg hover:bg-green-600 transition-colors">
-        Return to home page
-        </Link>
+        {/* 4. เพิ่มปุ่ม Link สองปุ่ม */}
+        <div className="mt-8 flex flex-col sm:flex-row justify-center items-center gap-4">
+          <Link href="/" className="inline-block bg-green-500 text-white font-semibold px-6 py-3 rounded-lg hover:bg-green-600 transition-colors">
+            Return to home page
+          </Link>
+
+
+        {/* 5. แสดงปุ่มนี้ ต่อเมื่อมี orderId */}
+        {orderId && (
+            <Link 
+              href={`/review/new?orderId=${orderId}`} 
+              className="inline-block bg-blue-500 text-white font-semibold px-6 py-3 rounded-lg hover:bg-blue-600 transition-colors"
+            >
+              Write a Review
+            </Link>
+          )}
+          </div>
       </div>
       <Footer />
     </div>
+
   );
 }

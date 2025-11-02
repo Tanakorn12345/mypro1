@@ -10,6 +10,7 @@ import Footer from '../../components/Footer'; // <-- Commented out for Canvas
 import StoreBanner from '../../components/StoreBanner';
 import MenuTabs from '../../components/MenuTabs';
 import MenuSection from '../../components/MenuSection';
+import ReviewSection from '../../components/ReviewSection';
 
 // --- ลบ import { allRestaurants } from '../../data/restaurant'; ---
 
@@ -127,6 +128,11 @@ export default function ShopDetailPage() {
           This restaurant has no menu items available in this category.
         </div>
       )}
+      {/* 3. เพิ่ม ReviewSection เข้าไปในหน้า */}
+      <ReviewSection 
+        title="Customer Reviews"
+        reviews={restaurant.reviews || []} // 👈 4. ส่ง reviews ที่ได้จาก API
+      />
       
       <Footer /> 
     </div>
