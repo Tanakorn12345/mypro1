@@ -18,7 +18,9 @@ export default function CreateRestaurantPage() {
         address: "",
         branch: "", // <-- เพิ่ม
         slug: "",   // <-- เพิ่ม
-        type: ""    // <-- เพิ่ม
+        type: "",    // <-- เพิ่ม
+        latitude: "",  // 👈 เพิ่ม
+        longitude: ""  // 👈 เพิ่ม
     });
     const [submitting, setSubmitting] = useState(false);
     const [submitStatus, setSubmitStatus] = useState({ message: "", type: "" });
@@ -237,6 +239,30 @@ export default function CreateRestaurantPage() {
                             required
                         />
                     </div>
+
+                    {/* 2. เพิ่มฟอร์มสำหรับ Latitude และ Longitude (อาจจะวางไว้ใกล้ๆ Address) */}
+                    <div className="flex flex-col sm:flex-row gap-4">
+                        <div className="flex-1">
+                            <label htmlFor="latitude" className="block font-semibold mb-1 text-gray-700">Latitude</label>
+                            <input
+                                type="number" step="any" id="latitude" name="latitude"
+                                value={form.latitude} onChange={handleChange}
+                                placeholder="e.g., 13.7563"
+                                className="w-full bg-orange-50 rounded-full px-4 py-2 outline-none focus:ring-2 focus:ring-green-400"
+                            />
+                        </div>
+                        <div className="flex-1">
+                            <label htmlFor="longitude" className="block font-semibold mb-1 text-gray-700">Longitude</label>
+                            <input
+                                type="number" step="any" id="longitude" name="longitude"
+                                value={form.longitude} onChange={handleChange}
+                                placeholder="e.g., 100.5018"
+                                className="w-full bg-orange-50 rounded-full px-4 py-2 outline-none focus:ring-2 focus:ring-green-400"
+                            />
+                        </div>
+                    </div>
+
+                    
 
                     {/* Submit Status */}
                     {submitStatus.message && (

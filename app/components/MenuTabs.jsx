@@ -4,7 +4,7 @@ import React from "react";
 // รับ props 3 ตัว: categories, activeTab, onTabClick
 function MenuTabs({ categories = [], activeTab, onTabClick }) {
   return (
-    <div className="sticky top-16 bg-white shadow-sm z-30">
+    <div className=" bg-white shadow-sm z-30">
       <div className="max-w-6xl mx-auto px-4 overflow-x-auto">
         <div className="flex space-x-8 border-b">
           {categories.map((category) => (

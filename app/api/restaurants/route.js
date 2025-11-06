@@ -44,6 +44,9 @@ export async function POST(request) {
         const slug = formData.get('slug');
         const type = formData.get('type');
         const imageFile = formData.get('image'); 
+        // 1. ดึงค่า latitude และ longitude จาก formData
+        const latitude = formData.get('latitude');
+        const longitude = formData.get('longitude');
 
         // Validation
         if (!name || !address || !phone) {
@@ -78,8 +81,8 @@ export async function POST(request) {
         // บันทึกลง DB (รวม branch, slug, type)
         const [insertResult] = await connection.execute(
             `INSERT INTO Restaurant 
-                (name, description, opening_hours, phone, address, branch, slug, type, image_url, owner_user_id, created_at, is_open) 
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?)`,
+                (name, description, opening_hours, phone, address, branch, slug, type, image_url, owner_user_id, created_at, is_open,latitude, longitude) 
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?,?, ?)`,
             [
                 name,
                 description || null,
@@ -91,7 +94,9 @@ export async function POST(request) {
                 type || null,
                 imageUrl,
                 ownerUserId,
-                true
+                true,
+                latitude || null, 
+                longitude || null  
             ]
         );
         const newRestaurantId = insertResult.insertId;
@@ -127,7 +132,10 @@ export async function GET(request) {
                 slug,
                 type,
                 image_url as image,
-                is_open
+                is_open,
+                latitude,   -- 👈 เพิ่ม
+                longitude,  -- 👈 เพิ่ม
+                rating      -- 👈 เพิ่ม (สำหรับฟิลเตอร์ดาว)
             FROM Restaurant
             WHERE is_open = true`
         );

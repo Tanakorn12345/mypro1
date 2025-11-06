@@ -1,12 +1,33 @@
 "use client";
 
-import React, { useState, useRef, useEffect, useMemo } from "react"; // <-- เพิ่ม useEffect, useMemo
+import React, { useState, useRef, useEffect, useMemo } from "react"; 
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import Card from "../components/Card";
-import { Loader2 } from "lucide-react"; // <-- เพิ่ม Loader
+import { Loader2 } from "lucide-react"; 
 
-// import { allRestaurants } from "../data/restaurant"; // <-- 1. ลบข้อมูลจำลอง
+// 🎯 [ใหม่] ฟังก์ชันคำนวณระยะทาง (Haversine formula)
+function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
+  if (!lat1 || !lon1 || !lat2 || !lon2) {
+    return Infinity; // ถ้าไม่มีพิกัด ให้ถือว่าไกลมาก
+  }
+  var R = 6371; // รัศมีของโลก (km)
+  var dLat = deg2rad(lat2 - lat1);
+  var dLon = deg2rad(lon2 - lon1);
+  var a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) *
+    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  var d = R * c; // ระยะทาง (km)
+  return d;
+}
+function deg2rad(deg) {
+  return deg * (Math.PI / 180);
+}
+// ---
+
+
 
 function Page() {
   // --- State สำหรับ Filter/Search (เหมือนเดิม) ---
@@ -24,6 +45,10 @@ function Page() {
   const [allRestaurants, setAllRestaurants] = useState([]); // <-- เก็บข้อมูลจริง
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  // 🎯 [ใหม่] State สำหรับเก็บตำแหน่งผู้ใช้
+  const [userLocation, setUserLocation] = useState(null); // { lat: ..., lng: ... }
+  const [locationError, setLocationError] = useState(null);
 
   // --- 3. useEffect สำหรับ Fetch ข้อมูลร้านค้า ---
   useEffect(() => {
@@ -49,6 +74,31 @@ function Page() {
     fetchRestaurants();
   }, []); // [] = ทำงานครั้งเดียว
 
+
+  // 🎯 [ใหม่] useEffect (ขอตำแหน่งผู้ใช้)
+  useEffect(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setUserLocation({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+          });
+          setLocationError(null);
+        },
+        (err) => {
+          // ถ้าผู้ใช้ปฏิเสธ หรือหาตำแหน่งไม่ได้
+          console.warn("Geolocation error:", err.message);
+          setLocationError("Could not get your location. Distance filter is disabled.");
+        }
+      );
+    } else {
+      setLocationError("Geolocation is not supported by this browser.");
+    }
+  }, []); // ทำงานครั้งเดียว
+
+
+
   // --- useEffect สำหรับ Click Outside (เหมือนเดิม) ---
   useEffect(() => {
     function handleClickOutside(event) {
@@ -73,33 +123,62 @@ function Page() {
     if (filterType === "rating") setSelectedRating(null);
   };
 
-  // --- 4. filteredRestaurants (แก้ให้ใช้ State) ---
+  // --- 🎯 [แก้ไข] Logic การกรอง (filteredRestaurants) (รวมโค้ด 2 ส่วน) ---
   const filteredRestaurants = useMemo(() => {
-    // ใช้ allRestaurants (จาก state) แทน allRestaurants (จาก import)
+    // 1. ถ้ากำลังโหลดร้านค้า ให้ trả về mảng rỗng
+    if (loading) {
+      return [];
+    }
+    
+    // 2. ถ้าเลือกกรองระยะทาง แต่ยังไม่ได้ตำแหน่ง (และยังไม่มี Error) ให้ trả về mảng rỗng
+    if (selectedDistance && !userLocation && !locationError) {
+      return []; 
+    }
+
+    // 3. เริ่มกรอง
     return allRestaurants.filter(restaurant => {
-      // --- Logic การกรอง (เหมือนเดิม) ---
+      
+      // กรองด้วย Query (จาก Logic เดิม)
       if (query && !restaurant.name.toLowerCase().includes(query.toLowerCase())) {
         return false;
       }
+      
+      // กรองด้วย Type (จาก Logic เดิม)
       if (selectedType && restaurant.type !== selectedType) {
         return false;
       }
-      // (หมายเหตุ: API GET /api/restaurants ต้องส่ง Rating เป็นตัวเลข 1-5)
-      if (selectedRating && restaurant.rating !== selectedRating.length) { 
+      
+      // กรองด้วย Rating (แก้ไขให้ใช้ restaurant.rating)
+      if (selectedRating && Math.floor(restaurant.rating) !== selectedRating.length) { 
         return false;
       }
+      
+      // กรองด้วย Distance (ใช้ Logic ใหม่)
       if (selectedDistance) {
-        // (หมายเหตุ: API GET /api/restaurants ต้องส่ง Distance เป็นตัวเลข)
-        const distance = parseFloat(restaurant.distance); // แปลงเป็นตัวเลข
-        if (isNaN(distance)) return false; // ถ้าไม่มีข้อมูล distance ให้ข้าม
+        // ถ้าผู้ใช้ปิด Location หรือ ร้านไม่มีพิกัด ให้ซ่อน
+        if (locationError || !userLocation || !restaurant.latitude || !restaurant.longitude) {
+            return false;
+        }
+
+        // คำนวณระยะทาง
+        const distance = getDistanceFromLatLonInKm(
+          userLocation.lat,
+          userLocation.lng,
+          restaurant.latitude,
+          restaurant.longitude
+        );
+        
+        // (ใช้ Logic เดิมของคุณ)
         if (selectedDistance === "1-2KM" && (distance < 1 || distance > 2)) return false;
         if (selectedDistance === "3-4KM" && (distance < 3 || distance > 4)) return false;
         if (selectedDistance === "4-6KM" && (distance < 4 || distance > 6)) return false;
         if (selectedDistance === "6KM+" && distance <= 6) return false;
       }
+      
+      // 4. ผ่านทุกเงื่อนไข
       return true;
     });
-  }, [allRestaurants, query, selectedType, selectedRating, selectedDistance]); // <-- เพิ่ม Dependencies
+  }, [allRestaurants, query, selectedType, selectedRating, selectedDistance, loading, userLocation, locationError]); // <-- Dependencies ที่ถูกต้อง
 
 
   return (
@@ -144,6 +223,20 @@ function Page() {
             Search
           </button>
         </div>
+
+        {/* 🎯 [เพิ่ม] แสดงสถานะการรอตำแหน่ง */}
+        {selectedDistance && !userLocation && !locationError && (
+            <div className="mt-2 text-sm text-blue-600">
+                <Loader2 className="w-4 h-4 inline animate-spin mr-1" />
+                Getting your location for distance filter...
+            </div>
+        )}
+        {locationError && (
+            <div className="mt-2 text-sm text-red-600">
+                {locationError}
+            </div>
+        )}
+
 
         {/* Dropdown filter */}
         {showDropdown && (
@@ -213,7 +306,12 @@ function Page() {
               </div>
             ) : (
               <div className="text-center py-20">
-                <p className="text-xl text-gray-500">😢 No restaurants found that match the criteria.</p>
+                {/*  [เพิ่ม] แสดงข้อความให้ถูกต้อ */}
+                {(selectedDistance && !userLocation && !locationError) ? (
+                    <p className="text-xl text-gray-500">Finding restaurants near you...</p>
+                ) : (
+                    <p className="text-xl text-gray-500">😢 No restaurants found that match the criteria.</p>
+                )}
               </div>
             )}
           </>

@@ -47,7 +47,9 @@ export async function GET(request, context) {
                 type,
                 rating,
                 reviewCount,
-                opening_hours
+                opening_hours,
+                latitude,   
+                longitude  
              FROM Restaurant
              WHERE slug = ? AND is_open = true`,
             [slug]
