@@ -4,6 +4,19 @@ import { serialize } from 'cookie';
 import bcrypt from 'bcrypt';
 import pool from '../../../../lib/db';
 
+
+// // Testing Shop Login
+// // method: POST
+// // URL: http://localhost:3000/api/auth/shop-login
+// // body: raw JSON
+// // {
+// //   "username": "MK",
+// //   "password": "[รหัสผ่านของ MK]"
+// // }
+//
+
+
+
 export async function POST(request) {
     let connection;
     try {

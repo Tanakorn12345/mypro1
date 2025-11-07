@@ -22,6 +22,16 @@ async function verifyAdmin(request) {
     }
 }
 
+
+// // Testing Get User by ID (Admin)
+// // method: GET
+// // URL: http://localhost:3000/api/admin/users/1
+// // (ต้อง Login เป็น Admin ก่อน / เลข 1 คือ ID ของ user ที่มีอยู่)
+//
+
+
+
+
 // --- 1. API Handler สำหรับ GET (ดึงข้อมูล User คนเดียว) ---
 // (สำหรับหน้า Update Form)
 export async function GET(request, { params }) {
@@ -58,10 +68,28 @@ export async function GET(request, { params }) {
 }
 
 
+// // Testing Update User (Admin)
+// // method: PUT
+// // URL: http://localhost:3000/api/admin/users/1
+// // body: raw JSON
+// // {
+// //   "username": "tanakorn_updated",
+// //   "email": "tanakorn.up@mahidol.edu",
+// //   "phone": "0812345678",
+// //   "role": "customer",
+// //   "password": ""
+// // }
+// // (ต้อง Login เป็น Admin ก่อน / เลข 1 คือ ID ของ user ที่มีอยู่)
+//
+
+
+
+
+
 // --- 2. API Handler สำหรับ PUT (อัปเดตข้อมูล User) ---
 // (สำหรับหน้า Update Form)
 export async function PUT(request, { params }) {
-    const { id: userIdToUpdate } = await params; // ✅ ต้อง await
+    const { id: userIdToUpdate } = await params; //  ต้อง await
 
     // ตรวจสอบสิทธิ์ Admin
     const authCheck = await verifyAdmin(request);
@@ -77,7 +105,7 @@ export async function PUT(request, { params }) {
         if (!username || !email || !role) {
             return NextResponse.json({ message: 'Username, email, and role are required.' }, { status: 400 });
         }
-        // --- 🎯 ตรวจสอบ Role ที่ส่งมา ---
+        // ---  ตรวจสอบ Role ที่ส่งมา ---
         const allowedRoles = ['customer', 'shop', 'admin']; // หรือ 'restaurant'
         if (!allowedRoles.includes(role.toLowerCase())) {
             return NextResponse.json({ message: 'Invalid role specified.' }, { status: 400 });
@@ -138,18 +166,25 @@ export async function PUT(request, { params }) {
 }
 
 
+// // Testing Delete User (Admin)
+// // method: DELETE
+// // URL: http://localhost:3000/api/admin/users/13
+// // (ต้อง Login เป็น Admin ก่อน / เลข 13 คือ ID ของ user ที่ต้องการลบ และต้องไม่ใช่ Admin ที่กำลัง Login อยู่)
+//
+
+
 // --- 3. API Handler สำหรับ DELETE (ลบ User) ---
 // (สำหรับปุ่ม Delete ที่หน้า Admin Home)
 export async function DELETE(request, { params }) {
-    const { id: userId } = await params; // ✅ ต้อง await
+    const { id: userId } = await params; // ต้อง await
 
-    // ✅ ตรวจสอบสิทธิ์ Admin
+    //  ตรวจสอบสิทธิ์ Admin
     const authCheck = await verifyAdmin(request);
     if (!authCheck.isAdmin) {
         return NextResponse.json({ message: authCheck.error }, { status: authCheck.status });
     }
 
-    // ✅ ป้องกัน Admin ลบตัวเอง
+    //  ป้องกัน Admin ลบตัวเอง
     const adminUserId = authCheck.adminUser.id;
     if (adminUserId.toString() === userId.toString()) {
         return NextResponse.json({ message: "You cannot delete your own account." }, { status: 403 });
@@ -171,13 +206,13 @@ export async function DELETE(request, { params }) {
         }
 
         console.log(`Admin (${authCheck.adminUser.username}) deleted user ID: ${userId}`);
-        return new Response(null, { status: 204 }); // ✅ สำเร็จ
+        return new Response(null, { status: 204 }); //  สำเร็จ
 
     } catch (error) {
         console.error(`DELETE /api/admin/users/${userId} error:`, error);
         if (connection) connection.release();
 
-        // ✅ ตรวจจับ Foreign Key Error
+        //  ตรวจจับ Foreign Key Error
         if (error.code === "ER_ROW_IS_REFERENCED_2") {
             return NextResponse.json({
                 message:

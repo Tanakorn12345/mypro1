@@ -4,6 +4,18 @@ import { serialize } from 'cookie';
 import bcrypt from 'bcrypt';
 import pool from '../../../../lib/db';
 
+
+// // Testing Admin Login
+// // method: POST
+// // URL: http://localhost:3000/api/auth/admin-login
+// // body: raw JSON
+// // {
+// //   "username": "Bank",
+// //   "password": "[รหัสผ่านของ Bank]"
+// // }
+//
+
+
 export async function POST(request) {
     let connection;
     try {

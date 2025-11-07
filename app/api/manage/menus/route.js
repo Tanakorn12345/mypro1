@@ -25,6 +25,14 @@ async function verifyShopOwner(request) {
     }
 }
 
+// // Testing Get All Menus (Shop Owner)
+// // method: GET
+// // URL: http://localhost:3000/api/manage/menus
+// // (ต้อง Login เป็น Shop ก่อน)
+//
+
+
+
 // --- API Handler สำหรับ GET (ดึงเมนูทั้งหมดของร้าน) ---
 export async function GET(request) {
     // --- 1. ตรวจสอบสิทธิ์ ---
@@ -70,6 +78,22 @@ export async function GET(request) {
         return NextResponse.json({ message: 'An internal server error occurred.' }, { status: 500 });
     }
 }
+
+
+// // Testing Insert a new Menu (Shop Owner)
+// // method: POST
+// // URL: http://localhost:3000/api/manage/menus
+// // body: form-data (ไม่ใช่ JSON เพราะมีอัปโหลดรูป)
+// // - name: "New Test Menu"
+// // - description: "A delicious test menu item."
+// // - price: "150"
+// // - category: "Main Course"
+// // - is_available: "true"
+// // - image: (แนบไฟล์รูปภาพ)
+// // (ต้อง Login เป็น Shop ก่อน)
+//
+
+
 
 // --- 🚀 ฟังก์ชัน POST ใหม่ (เพิ่มเมนู) ---
 export async function POST(request) {

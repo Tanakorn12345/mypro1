@@ -2,6 +2,34 @@ import { NextResponse } from 'next/server';
 import bcrypt from 'bcrypt';
 import pool from '../../../../lib/db'; // 👈 1. Import connection pool ที่เราสร้างไว้
 
+
+// // Testing Register New Customer
+// // method: POST
+// // URL: http://localhost:3000/api/auth/register
+// // body: raw JSON
+// // {
+// //   "username": "new_customer_01",
+// //   "email": "customer1@test.com",
+// //   "phone": "0801234567",
+// //   "password": "password123",
+// //   "role": "customer"
+// // }
+//
+// // Testing Register New Shop
+// // method: POST
+// // URL: http://localhost:3000/api/auth/register
+// // body: raw JSON
+// // {
+// //   "username": "new_shop_01",
+// //   "email": "shop1@test.com",
+// //   "phone": "0809876543",
+// //   "password": "password123",
+// //   "role": "shop"
+// // }
+//
+
+
+
 export async function POST(request) {
     let connection; // ประกาศ connection ไว้ข้างนอก try-finally
     try {

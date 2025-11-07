@@ -4,6 +4,18 @@ import { serialize } from 'cookie';
 import bcrypt from 'bcrypt'; // 👈 1. Import bcrypt
 import pool from '../../../../lib/db'; // 👈 2. Import connection pool
 
+// // Testing Customer Login
+// // method: POST
+// // URL: http://localhost:3000/api/auth/customer-login
+// // body: raw JSON
+// // {
+// //   "username": "tanakorn16",
+// //   "password": "[รหัสผ่านของ tanakorn16]"
+// // }
+//
+
+
+
 export async function POST(request) {
     console.log("\n--- [API /customer-login] Checking JWT_SECRET ---");
     console.log("Value of process.env.JWT_SECRET:", process.env.JWT_SECRET);

@@ -23,6 +23,14 @@ async function verifyAdmin(request) {
     }
 }
 
+// // Testing Get All Users (Admin)
+// // method: GET
+// // URL: http://localhost:3000/api/admin/users
+// // (ต้อง Login เป็น Admin ก่อน)
+//
+
+
+
 // --- API Handler สำหรับ GET (ดึง User ทั้งหมด) ---
 export async function GET(request) {
     // --- 1. ตรวจสอบสิทธิ์ Admin ---
@@ -58,6 +66,68 @@ export async function GET(request) {
     }
 }
 
-// --- (ในอนาคต) เพิ่มฟังก์ชัน POST สำหรับสร้าง User ในไฟล์นี้ ---
-// export async function POST(request) { ... }
+// // Testing Insert a new User (Admin)
+// // method: POST
+// // URL: http://localhost:3000/api/admin/users
+// // body: raw JSON
+// // {
+// //   "username": "new_admin_02",
+// //   "email": "admin02@test.com",
+// //   "phone": "0998887777",
+// //   "password": "password123",
+// //   "role": "admin"
+// // }
+// // (ต้อง Login เป็น Admin ก่อน)
+//
+
+
+export async function POST(request) {
+    // 1. ตรวจสอบสิทธิ์ Admin
+    const authCheck = await verifyAdmin(request);
+    if (!authCheck.isAdmin) {
+        return NextResponse.json({ message: authCheck.error }, { status: authCheck.status });
+    }
+
+    let connection;
+    try {
+        const { username, email, phone, password, role } = await request.json();
+
+        // 2. Validation
+        if (!username || !email || !password || !role) {
+            return NextResponse.json({ message: 'Username, email, password, and role are required.' }, { status: 400 });
+        }
+        if (password.length < 6) {
+            return NextResponse.json({ message: 'Password must be at least 6 characters long.' }, { status: 400 });
+        }
+        const allowedRoles = ['customer', 'shop', 'admin'];
+        if (!allowedRoles.includes(role.toLowerCase())) {
+            return NextResponse.json({ message: 'Invalid role specified.' }, { status: 400 });
+        }
+
+        connection = await pool.getConnection();
+
+        // 3. ตรวจสอบ Email ซ้ำ
+        const [existingUsers] = await connection.execute('SELECT id FROM users WHERE email = ?', [email]);
+        if (existingUsers.length > 0) {
+            connection.release();
+            return NextResponse.json({ message: 'Email already in use.' }, { status: 409 });
+        }
+
+        // 4. Hash รหัสผ่าน และ Insert
+        const hashedPassword = await bcrypt.hash(password, 10);
+        await connection.execute(
+            'INSERT INTO users (username, email, phone, password, role, created_at) VALUES (?, ?, ?, ?, ?, NOW())',
+            [username, email, phone || null, hashedPassword, role.toLowerCase()]
+        );
+        connection.release();
+
+        return NextResponse.json({ message: 'User created successfully by admin.' }, { status: 201 });
+
+    } catch (error) {
+        console.error('POST /api/admin/users error:', error);
+        if (connection) connection.release();
+        if (error instanceof SyntaxError) { return NextResponse.json({ message: 'Invalid JSON payload.' }, { status: 400 }); }
+        return NextResponse.json({ message: 'An internal server error occurred.' }, { status: 500 });
+    }
+}
 

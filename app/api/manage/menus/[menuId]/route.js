@@ -36,6 +36,15 @@ async function getRestaurantId(connection, ownerUserId) {
      return restaurantRows[0].Restaurant_Id;
 }
 
+
+// // Testing Get Menu by ID (Shop Owner)
+// // method: GET
+// // URL: http://localhost:3000/api/manage/menus/101
+// // (ต้อง Login เป็น Shop เจ้าของเมนู / 101 คือ Menu_Id ที่มีอยู่)
+//
+
+
+
 // --- API Handler สำหรับ GET (ดึงข้อมูลเมนูชิ้นเดียว) ---
 export async function GET(request, { params }) {
     // *** แก้ไข: ดึง menuId หลัง await อื่นๆ ***
@@ -87,6 +96,23 @@ export async function GET(request, { params }) {
         return NextResponse.json({ message: 'An internal server error occurred.' }, { status: 500 });
     }
 }
+
+
+// // Testing Update Menu (Shop Owner)
+// // method: PUT
+// // URL: http://localhost:3000/api/manage/menus/101
+// // body: form-data (ไม่ใช่ JSON)
+// // - name: "Updated Test Menu"
+// // - description: "Updated description."
+// // - price: "160"
+// // - category: "Main Course"
+// // - is_available: "true"
+// // - image: (แนบไฟล์ใหม่ หรือ เว้นว่างไว้เพื่อใช้รูปเดิม)
+// // (ต้อง Login เป็น Shop เจ้าของเมนู / 101 คือ Menu_Id ที่มีอยู่)
+//
+
+
+
 
 
 // --- API Handler สำหรับ PUT (อัปเดตเมนู) ---
@@ -224,9 +250,15 @@ export async function PUT(request, { params }) {
 }
 
 
+// // Testing Delete Menu (Shop Owner)
+// // method: DELETE
+// // URL: http://localhost:3000/api/manage/menus/101
+// // (ต้อง Login เป็น Shop เจ้าของเมนู / 101 คือ Menu_Id ที่มีอยู่)
+//
+
 
 export async function DELETE(request, { params }) {
-    const { menuId } = await params; // ✅ ต้อง await ก่อน
+    const { menuId } = await params; // ต้อง await ก่อน
 
     // 1. ตรวจสอบสิทธิ์
     const authCheck = await verifyShopOwner(request);
